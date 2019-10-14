@@ -50,7 +50,7 @@
         "pm2": "^3.2.2",
         "redis": "^2.8.0",
         "request": "^2.88.0",
-        "stratum-pool": "git+https://github.com/ROZ-MOFUMOFU-ME/node-stratum-pool-yescrypt-0.5.git"
+        "stratum-pool": "git+https://github.com/wahaobi/node-stratum-pool-yescrypt-0.5.git"
     },
     "engines": {
         "node": ">=8.11"
