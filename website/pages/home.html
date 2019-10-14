@@ -1,3 +1,4 @@
+<meta name=”viewport” content=”width=device-width, initial-scale=1″ />
 <style>
     #boxWelcome{
         background-color: #0eafc7;
@@ -46,6 +47,9 @@
     #boxStatsRight{
         background-color: #10bb9c;
     }
+    #boxStatsCenter{
+        background-color: #bb1088;
+    }
     .boxStats{
         color: white;
     }
@@ -72,33 +76,49 @@
 
 
 </style>
-
+<script>
+    $(document).ready(function(){
+        $.ajax({url: "/static/prices/usd", success: function(result){
+            $("#priceUSD").html(result);
+        }});
+    
+        $.ajax({url: "/static/prices/btc", success: function(result){
+            $("#priceBTC").html(result);
+        }});
+    
+        $.ajax({url: "/static/prices/timestamp", success: function(result){
+            $("#priceTS").html(result);
+        }});
+    
+    });
+    </script>
 
 <div class="pure-g-r" id="boxWelcome">
     <div class="pure-u-1-3">
         <img id="logoImg" src="/static/logo.png">
     </div>
     <div class="pure-u-2-3">
-        <div id="welcomeText">Welcome to the future of mining</div>
+        <div id="welcomeText">MBC国池</div>
         <ul id="welcomeItems">
-            <li>Low fees</li>
-            <li>High performance Node.js backend</li>
-            <li>User friendly mining client</li>
-            <li>Multi-coin / multi-pool</li>
+            <li><font color="#FFEBCD">5G以上算力加QQ申请专属线路QQ:394533316</font></li>
+            <li>挖矿地址：<font color="#9932CC">pool.mbc.52hash.com:3032</font></li>
+            <li>交流QQ群:424495679&nbsp;&nbsp;支付周期:1小时&nbsp;&nbsp;手续费:1%</li>
         </ul>
     </div>
 </div>
 
+{{ function capitalizeFirstLetter(t){return t.charAt(0).toUpperCase()+t.slice(1)} }}
+{{ function readableDate(a){ return new Date(parseInt(a)).toString(); } }}
 <div class="pure-g-r" id="boxesLower">
-
-    <div class="pure-u-1-2">
+    {{ for(var pool in it.stats.pools) { }}
+    <div class="pure-u-1-3">
         <div class="boxStats" id="boxStatsLeft">
-            <div class="boxLowerHeader">Global Stats</div>
+            <div class="boxLowerHeader">矿池算力</div>
             <div class="boxStatsList">
                 {{ for(var algo in it.stats.algos) { }}
                 <div>
                     <div><i class="fa fa-flask"></i>{{=algo}}</div>
-                    <div><i class="fa fa-users"></i><span id="statsMiners{{=algo}}">{{=it.stats.algos[algo].workers}}</span> Miners</div>
+                    <div><i class="fa fa-users"></i><span id="statsMiners{{=algo}}">{{=it.stats.pools[pool].minerCount}}</span>在线矿工</div>
                     <div><i class="fa fa-tachometer"></i><span id="statsHashrate{{=algo}}">{{=it.stats.algos[algo].hashrateString}}</span></div>
                 </div>
                 {{ } }}
@@ -106,28 +126,37 @@
         </div>
     </div>
 
-    <div class="pure-u-1-2">
-        <div class="boxStats" id="boxStatsRight">
-            <div class="boxLowerHeader">Pools / Coins</div>
-            <div class="boxStatsList">
-                {{ for(var pool in it.stats.pools) { }}
-                <div>
-                    <div><i class="fa fa-dot-circle-o"></i>{{=pool}}</div>
-                    <div><i class="fa fa-users"></i><span id="statsMiners{{=pool}}">{{=it.stats.pools[pool].workerCount}}</span> Miners</div>
-                    <div><i class="fa fa-tachometer"></i><span id="statsHashrate{{=pool}}">{{=it.stats.pools[pool].hashrateString}}</span></div>
-                </div>
+        <div class="pure-u-1-3">
+            <div class="boxStats" id="boxStatsRight">
+                <div class="boxLowerHeader">全网算力</div>
+                <div class="boxStatsList">
+                    <div>
+                        <div><i class="fa fa-bars" aria-hidden="true"></i><small>区块高度:</small> <span id="statsNetworkBlocks{{=pool}}">{{=it.stats.pools[pool].poolStats.networkBlocks}}</span></div>
+                        <div><i class="fa fa-tachometer"></i><small>全网算力:</small> <span id="statsNetworkSols{{=pool}}">{{=it.stats.pools[pool].poolStats.networkSolsString}}</span></div>
+                        <div><i class="fa fa-unlock-alt" aria-hidden="true"></i><small>挖矿难度:</small> <span id="statsNetworkDiff{{=pool}}">{{=it.stats.pools[pool].poolStats.networkDiff}}</span></div>
+                        <div><i class="fa fa-users"></i><small>节点连接:</small> <span id="statsNetworkConnections{{=pool}}">{{=it.stats.pools[pool].poolStats.networkConnections}}</span></div>
+                    </div>
                 {{ } }}
             </div>
         </div>
     </div>
-
+    <div class="pure-u-1-3">
+        <div class="boxStats" id="boxStatsCenter">
+            <div class="boxLowerHeader">市场价格</div>
+            <div class="boxStatsList">
+                <div>
+					<div><i class="fa fa-clock-o"></i><span id="priceTS"></span></div>
+					<div><i class="fa fa-btc"></i><span id="priceBTC"></span>BTC</div>
+					<div><i class="fa fa-usd"></i><span id="priceUSD"></span>美元</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
     $(function() {
         statsSource.addEventListener('message', function (e) {
-            if (document.hidden) return;
-            
             var stats = JSON.parse(e.data);
             for (algo in stats.algos) {
                 $('#statsMiners' + algo).text(stats.algos[algo].workers);
